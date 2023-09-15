@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  wall_display_dev2:
+    tty: true
+    stdin_open: true
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.dev
+    container_name: wall_display_dev2
+    ports:
+      - "5173:5173"
+    volumes:
+      - /app/node_modules
+      - ./.svelte-kit:/app/.svelte-kit
+      - ./src:/app/src
+      - ./static:/app/static
+      - ./vite.config.js:/app/vite.config.js
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./svelte.config.js:/app/svelte.config.js
+      - ./tailwind.config.js:/app/tailwind.config.js
+      - ./postcss.config.js:/app/postcss.config.js
+      - ./jsconfig.json:/app/jsconfig.json
+
+  wall_display_nginx_proxy_dev2:
+    container_name: wall_display_nginx_proxy_dev2
+    image: "nginx:latest"
+    restart: unless-stopped
+    ports:
+      - "8485:8485"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    expose:
+      - "8485"
+
+    volumes:
+      - ./nginx/nginx-dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ./nginx/fastcgi.conf:/etc/nginx/fastcgi.conf:ro
+      - ./nginx/mime.types:/etc/nginx/mime.types:ro
+      - ./nginx/logs:/etc/nginx/logs
+    privileged: true
+    logging:
+      options:
+        max-size: 50m

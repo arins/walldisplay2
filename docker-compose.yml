@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  wall_display2:
+    build: .
+    image: wall-display2:v0.1.098
+    container_name: wall_display
+    ports:
+      - "5555:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  wall_display_nginx_proxy2:
+    container_name: wall_display_nginx_proxy2
+    image: "nginx:latest"
+    restart: unless-stopped
+
+    ports:
+      - "8484:80"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /opt/wall-display/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /opt/wall-display/proxy.conf:/etc/nginx/proxy.conf:ro
+      - /opt/wall-display/fastcgi.conf:/etc/nginx/fastcgi.conf:ro
+      - /opt/wall-display/mime.types:/etc/nginx/mime.types:ro
+      - /opt/wall-display/logs:/etc/nginx/logs
+    privileged: true
+    logging:
+      options:
+        max-size: 50m
+    labels:
+      - "traefik.http.routers.wall_display_int.rule=Host(`walldisplay.sinabian.se`) && HeadersRegexp(`X-Real-Ip`, `(^127\\.)|(^10\\.)|(^172\\.1[6-9]\\.)|(^172\\.2[0-9]\\.)|(^172\\.3[0-1]\\.)|(^192\\.168\\.)`)"
+      - "traefik.http.routers.wall_display_int.priority=100"
+      - "traefik.http.routers.wall_display_int.tls=true"
+      - "traefik.http.routers.wall_display_int.tls.certresolver=myresolver"
+      - "traefik.http.routers.wall_display_int.middlewares=nobasicauth"
+
+      - "traefik.http.routers.wall_display_ext.rule=Host(`walldisplay.sinabian.se`)"
+      - "traefik.http.routers.wall_display_ext.priority=99"
+      - "traefik.http.routers.wall_display_ext.tls=true"
+      - "traefik.http.routers.wall_display_ext.tls.certresolver=myresolver"
+      - "traefik.http.routers.wall_display_ext.middlewares=basicauth"
+
+      #- "traefik.http.services.wall_display_nginx_proxy.loadbalancer.server.port=8484"
+      - "traefik.http.services.wall_display_nginx_proxy.loadbalancer.server.scheme=http"
