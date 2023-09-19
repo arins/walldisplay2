@@ -1,5 +1,4 @@
 <script script lang="ts">
-  
   export let dimmerValue: number;
   export let dimmerValueChange: (state: number) => void;
   let parentDiv: HTMLDivElement | undefined;

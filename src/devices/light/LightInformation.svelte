@@ -1,13 +1,7 @@
 <script script lang="ts">
-    
-
-
-    export let switchState: boolean;
-    export let label: string;
-
-
+  export let switchState: boolean;
+  export let label: string;
 </script>
-
 
 <div class="flex flex-col w-20">
   <div class="truncate select-none text-black">{label}</div>
