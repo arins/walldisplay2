@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-static": "^2.0.3",
 		"konsta": "^2.0.0",
 		"svelte-icons-pack": "^2.1.0"
 	}

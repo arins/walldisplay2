@@ -5,7 +5,7 @@
     export let allItems: OpenHabItem[] = [];
     export let label: string;
     export let dimmerItemName: string;
-    export let switchItemName: String | undefined;
+    export let switchItemName: String | undefined = undefined;
 
     let switchItem: OpenHabItem | undefined = undefined;
     let dimmerItem: OpenHabItem | undefined = undefined;

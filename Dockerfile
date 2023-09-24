@@ -1,38 +1,37 @@
-
-FROM node:18-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# Dockerfile
+ 
+FROM node:latest as build
+ 
+RUN npm install -g npm
+ 
 WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN  npm install --production
-
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+RUN npm install
+ 
 COPY . .
-
-ENV NEXT_TELEMETRY_DISABLED 1
-
 RUN npm run build
+ 
+FROM nginx:latest as deploy-static
 
-FROM node:18-alpine AS runner
+
+RUN mkdir /app
+
+RUN mkdir /conf
+RUN mkdir /conf/logs
 WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/public ./public
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT 3000
-
-CMD ["npm", "start"]
+RUN rm -rf ./*
+RUN mkdir /app/build
+RUN mkdir /app/logs
+RUN touch /app/logs/error.log
+RUN touch /app/logs/access.log
+RUN touch /app/logs/nginx.pid
+COPY --from=build /app/build ./build
+COPY --from=build /app/nginx /conf
+RUN chown -R nginx:nginx /app 
+RUN chown -R nginx:nginx /conf 
+RUN mkdir /var/cache/nginx/client_temp
+RUN mkdir /var/cache/nginx/proxy_temp
+RUN chown -R nginx:nginx /var/cache/nginx
+USER nginx:nginx
+EXPOSE 9099
+ENTRYPOINT [ "nginx", "-c", "/conf/nginx.conf", "-g", "daemon off;" ]
