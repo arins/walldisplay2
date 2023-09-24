@@ -3,7 +3,7 @@ version: "3.8"
 services:
   wall_display2:
     build: .
-    image: wall-display2:v0.1.098
+    image: wall-display2:v0.1.099
     container_name: wall_display2
     ports:
       - "9099:9099"
@@ -23,5 +23,5 @@ services:
       - "traefik.http.routers.wall_display2_ext.tls.certresolver=myresolver"
       - "traefik.http.routers.wall_display2_ext.middlewares=basicauth"
 
-      #- "traefik.http.services.wall_display_nginx_proxy.loadbalancer.server.port=9099"
+      - "traefik.http.services.wall_display2.loadbalancer.server.port=9099"
       - "traefik.http.services.wall_display2.loadbalancer.server.scheme=http"
