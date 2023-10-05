@@ -3,7 +3,7 @@ version: "3.8"
 services:
   wall_display2:
     build: .
-    image: wall-display2:v0.1.102
+    image: wall-display2:v0.1.103
     container_name: wall_display2
     ports:
       - "9099:9099"
